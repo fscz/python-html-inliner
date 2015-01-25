@@ -63,4 +63,9 @@ Once you have a local folder with all the files you need, you can work locally, 
 * python inliner.py  -d tmp -u http://wikipedia.org  > wikipedia.html
 * python inliner.py  -d tmp -u http://wikipedia.org  --local --no-images --no-fonts > wikipedia.html
 
-You can see some results [here](https://github.com/fscz/python-html-inliner/examples)
+Here you can see some results:
+
+* [https://www.factis.de/](https://cdn.rawgit.com/fscz/python-html-inliner/master/examples/factis.html)
+* [https://www.factis.de/jobs](https://cdn.rawgit.com/fscz/python-html-inliner/master/examples/jobs.html)
+* [http://http://www.lohmann-birkner.de/en/index.php](https://cdn.rawgit.com/fscz/python-html-inliner/master/examples/lub.html)
+* [https://www.python.org/](https://cdn.rawgit.com/fscz/python-html-inliner/master/examples/python.html)
