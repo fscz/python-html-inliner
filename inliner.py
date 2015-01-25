@@ -94,7 +94,7 @@ def inline(soup, downloadDir, file_map):
     def inline_link(link_tag):
         href = link_tag['href']
 
-        if href in file_map.keys():
+        if href is not None and href in file_map.keys():
 
             # NOTE: some file references, may not have been downloaded because
             # the containing class or element is not used in the html file
@@ -107,7 +107,15 @@ def inline(soup, downloadDir, file_map):
                 type = 'text/javascript'
             elif href.endswith('.css'):
                 type = 'text/css'
-        
+            else:
+                for ext in ['png', 'gif', 'jpg', 'jpeg']:
+                    if href.endswith(ext):
+                        type = ('image/%s' % ext)
+                        break
+
+            if type is None and (href.endswith('.ico') or ('type' in link_tag.attrs and link_tag['type'] == 'image/x-icon')):
+                type = 'image/x-icon'
+
             if type is None and 'type' in link_tag.attrs:
                 type = link_tag['type']
 
@@ -118,26 +126,32 @@ def inline(soup, downloadDir, file_map):
                 return link_tag
                 
             tag = None
-            if type is not None and not 'css' in type:
-                tag = soup.new_tag("script", type=type, _from=href)
-            else:
+            if type is not None and 'css' in type:
                 tag = soup.new_tag("style", type=type, _from=href)
-            tag.append(soup.new_string(file_map[href]['value']))
+                tag.append(soup.new_string(file_map[href]['value']))
+            elif type is not None and 'image' in type:
+                tag = soup.new_tag("link", type=type, _from=href, href="data:%s;base64,%s" % (file_map[href]['mime'], file_map[href]['value']))
+            else:
+                tag = soup.new_tag("script", type=type, _from=href)
+                tag.append(soup.new_string(file_map[href]['value']))
+            
             return tag
         else:
             return link_tag
 
     def inline_video(video_tag):
-        src = video_tag['src'].strip()
+        src = video_tag['src']
         sources = video_tag.find_all('source')
         if src is not None and src != "" and src in file_map.keys():
             video_tag['src'] = "data:%s;base64,%s" % (file_map[src]['mime'], file_map[src]['value'])
+            video_tag['_from'] = src
         elif sources != []:
             for source in sources:
                 src = source['src'].strip()
                 if src in file_map.keys():
                     mime = source['type'] if 'type' in source.attrs else file_map[src]['mime']
                     source['src'] = "data:%s;base64,%s" % (mime, file_map[src]['value'])
+                    source['_from'] = src
         return video_tag
 
     def inline_img(img_tag):
